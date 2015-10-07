@@ -3,6 +3,10 @@ import argparse
 import pathlib
 import os
 
+MIN_ID = 10000
+MAX_ID = 30000
+GID = 10000
+
 
 def usage_msg():
     return '''\
@@ -40,6 +44,18 @@ def usage_msg():
     '''
 
 
+def get_max_uid(min_id, max_id):
+    uid_list = []
+    with open('/etc/passwd') as f:
+        for line in f:
+            uid = int(line.split(':')[2])
+            if uid >= min_id and uid <= max_id:
+                uid_list.append(uid)
+    if not uid_list:
+        return min_id
+    return max(uid_list)
+
+
 def main():
     # check opt
     parser = argparse.ArgumentParser(
@@ -58,6 +74,8 @@ def main():
     user_list = course_dir + '/user_list'
     ta_list = course_dir + '/ta_list'
 
+    uid = get_max_uid(MIN_ID, MAX_ID) + 1
+
     with open(user_list) as f:
         for line in f:
             stu_id = ''
@@ -68,6 +86,10 @@ def main():
                 stu_id = line.strip()
                 email = stu_id + email
             # TODO: create account
+            cmd = 'useradd -m -d /home/{0}/{1} -g {2} -u {3} {1}'.format(
+                  course, stu_id, GID, uid)
+            print (cmd)
+            uid = uid + 1
 
     with open(ta_list) as f:
         for line in f:
