@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 import argparse
+import pathlib
+import os
 
 
 def usage_msg():
@@ -49,6 +51,28 @@ def main():
                         help='course name directory')
 
     args = parser.parse_args()
+
+    # open file
+    course = args.course[0]
+    course_dir = './courses/' + course
+    user_list = course_dir + '/user_list'
+    ta_list = course_dir + '/ta_list'
+
+    with open(user_list) as f:
+        for line in f:
+            stu_id = ''
+            email = '@student.nsysu.edu.tw'
+            try:
+                stu_id, email = line.strip().split()
+            except:
+                stu_id = line.strip()
+                email = stu_id + email
+            # TODO: create account
+
+    with open(ta_list) as f:
+        for line in f:
+            ta_id, email = line.strip().split()
+            # TODO: mail to TA
 
 
 if __name__ == "__main__":
