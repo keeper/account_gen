@@ -15,12 +15,12 @@ PASS_SIZE = 6
 def usage_msg():
     return '''\
   This script creates user account against
-  the user_list put into the course directory.
+  the user_file put into the course directory.
 
   COURSE dir is located at ./courses/COURSE
   COURSE dir must be created with following files:
 
-  user_list: The student id list.
+  user_file: The student id list.
 
       Custom e-mail address may entered into
       this file also.
@@ -60,9 +60,10 @@ def get_max_uid(min_id, max_id):
     return max(uid_list)
 
 
-def create_user(filename, course_name, start_uid):
+def create_user(user_file, course_name, start_uid):
     uid = start_uid
-    with open(filename) as f:
+    user_list = []
+    with open(user_file) as f:
         for line in f:
             stu_id = ''
             email = '@student.nsysu.edu.tw'
@@ -88,7 +89,16 @@ def create_user(filename, course_name, start_uid):
                 string.ascii_uppercase + string.ascii_lowercase + string.digits)
                 for _ in range(PASS_SIZE))
             cmd = 'echo -e "{0}:{1}" | chpasswd'.format(stu_id, passwd)
+            user_list.append((stu_id, passwd))
             print (cmd)
+
+    return user_list
+
+
+def create_pass_file(pass_file, user_list):
+    with open(pass_file, 'w') as f:
+        for user, passwd in user_list:
+            f.write('{0} {1}\n'.format(user, passwd))
 
 
 def main():
@@ -106,13 +116,16 @@ def main():
     # open file
     course = args.course[0]
     course_dir = './courses/' + course
-    user_list = course_dir + '/user_list'
-    ta_list = course_dir + '/ta_list'
+    user_file = course_dir + '/user_list'
+    ta_file = course_dir + '/ta_list'
+    pass_file = course_dir + '/pass'
 
     uid = get_max_uid(MIN_ID, MAX_ID) + 1
-    create_user(user_list, course, uid)
+    user_list = create_user(user_file, course, uid)
+    create_pass_file(pass_file, user_list)
+    print (user_list)
 
-    with open(ta_list) as f:
+    with open(ta_file) as f:
         for line in f:
             ta_id, email = line.strip().split()
             # TODO: mail to TA
