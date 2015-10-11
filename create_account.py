@@ -60,7 +60,7 @@ def get_max_uid(min_id, max_id):
     return max(uid_list)
 
 
-def create_user(user_file, course_name, start_uid):
+def create_user(user_file, course_name, start_uid, dryrun):
     uid = start_uid
     user_list = []
     with open(user_file) as f:
@@ -75,22 +75,26 @@ def create_user(user_file, course_name, start_uid):
             # create account
             user_home = '/home/{0}/{1}'.format(course_name, stu_id)
             bash_file = user_home + '/.bashrc'
-            cmd = 'useradd -m -d {0} -u {1} -g {2} {3}'.format(
+            create_cmd = 'useradd -m -d {0} -u {1} -g {2} {3}'.format(
                   user_home, uid, GID, stu_id)
-            print (cmd)
             # inject docker command
             docker_cmd = '"docker run -t -i -v {0}:/home/user {1} /bin/bash"'.format(
                          user_home, IMAGE_NAME)
-            cmd = 'echo {0} >> {1}'.format(docker_cmd, bash_file)
+            docker_cmd = 'echo {0} >> {1}'.format(docker_cmd, bash_file)
             uid = uid + 1
-            print (cmd)
             # create password
             passwd = ''.join(random.choice(
                 string.ascii_uppercase + string.ascii_lowercase + string.digits)
                 for _ in range(PASS_SIZE))
-            cmd = 'echo -e "{0}:{1}" | chpasswd'.format(stu_id, passwd)
+            passwd_cmd = 'echo -e "{0}:{1}" | chpasswd'.format(stu_id, passwd)
             user_list.append((stu_id, passwd))
-            print (cmd)
+            if dryrun:
+                print (create_cmd)
+                print (docker_cmd)
+                print (passwd_cmd)
+            else:
+                os.system('{0} && {1} && {2}'.format(
+                    create_cmd, docker_cmd, passwd_cmd)
 
     return user_list
 
@@ -111,7 +115,11 @@ def main():
     parser.add_argument('course', metavar='COURSE', type=str, nargs=1,
                         help='course name directory')
 
+    parser.add_argument('-d', '--dryrun', default=False, action='store_true',
+                        help='dry run, output running command and do nothing')
+
     args = parser.parse_args()
+    print (args)
 
     # open file
     course = args.course[0]
@@ -121,9 +129,9 @@ def main():
     pass_file = course_dir + '/pass'
 
     uid = get_max_uid(MIN_ID, MAX_ID) + 1
-    user_list = create_user(user_file, course, uid)
-    create_pass_file(pass_file, user_list)
-    print (user_list)
+    user_list = create_user(user_file, course, uid, args.dryrun)
+    if not args.dryrun:
+        create_pass_file(pass_file, user_list)
 
     with open(ta_file) as f:
         for line in f:
