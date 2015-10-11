@@ -6,6 +6,7 @@ import os
 MIN_ID = 10000
 MAX_ID = 30000
 GID = 10000
+IMAGE_NAME = 'ubuntu-gccv2:14.04'
 
 
 def usage_msg():
@@ -56,6 +57,31 @@ def get_max_uid(min_id, max_id):
     return max(uid_list)
 
 
+def create_user(filename, course_name, start_uid):
+    uid = start_uid
+    with open(filename) as f:
+        for line in f:
+            stu_id = ''
+            email = '@student.nsysu.edu.tw'
+            try:
+                stu_id, email = line.strip().split()
+            except:
+                stu_id = line.strip()
+                email = stu_id + email
+            # TODO: create account
+            user_home = '/home/{0}/{1}'.format(course_name, stu_id)
+            bash_file = user_home + '/.bashrc'
+            cmd = 'useradd -m -d {0} -u {1} -g {2} {3}'.format(
+                  user_home, uid, GID, stu_id)
+            print (cmd)
+            # inject docker command
+            docker_cmd = '"docker run -t -i -v {0}:/home/user {1} /bin/bash"'.format(
+                         user_home, IMAGE_NAME)
+            cmd = 'echo {0} >> {1}'.format(docker_cmd, bash_file)
+            uid = uid + 1
+            print (cmd)
+
+
 def main():
     # check opt
     parser = argparse.ArgumentParser(
@@ -75,21 +101,7 @@ def main():
     ta_list = course_dir + '/ta_list'
 
     uid = get_max_uid(MIN_ID, MAX_ID) + 1
-
-    with open(user_list) as f:
-        for line in f:
-            stu_id = ''
-            email = '@student.nsysu.edu.tw'
-            try:
-                stu_id, email = line.strip().split()
-            except:
-                stu_id = line.strip()
-                email = stu_id + email
-            # TODO: create account
-            cmd = 'useradd -m -d /home/{0}/{1} -g {2} -u {3} {1}'.format(
-                  course, stu_id, GID, uid)
-            print (cmd)
-            uid = uid + 1
+    create_user(user_list, course, uid)
 
     with open(ta_list) as f:
         for line in f:
