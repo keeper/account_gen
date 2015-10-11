@@ -2,11 +2,14 @@
 import argparse
 import pathlib
 import os
+import random
+import string
 
 MIN_ID = 10000
 MAX_ID = 30000
 GID = 10000
 IMAGE_NAME = 'ubuntu-gccv2:14.04'
+PASS_SIZE = 6
 
 
 def usage_msg():
@@ -68,7 +71,7 @@ def create_user(filename, course_name, start_uid):
             except:
                 stu_id = line.strip()
                 email = stu_id + email
-            # TODO: create account
+            # create account
             user_home = '/home/{0}/{1}'.format(course_name, stu_id)
             bash_file = user_home + '/.bashrc'
             cmd = 'useradd -m -d {0} -u {1} -g {2} {3}'.format(
@@ -79,6 +82,12 @@ def create_user(filename, course_name, start_uid):
                          user_home, IMAGE_NAME)
             cmd = 'echo {0} >> {1}'.format(docker_cmd, bash_file)
             uid = uid + 1
+            print (cmd)
+            # create password
+            passwd = ''.join(random.choice(
+                string.ascii_uppercase + string.ascii_lowercase + string.digits)
+                for _ in range(PASS_SIZE))
+            cmd = 'echo -e "{0}:{1}" | chpasswd'.format(stu_id, passwd)
             print (cmd)
 
 
