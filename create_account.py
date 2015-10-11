@@ -5,6 +5,8 @@ import os
 import random
 import string
 import mailer
+import sys
+import time
 
 MIN_ID = 10000
 MAX_ID = 30000
@@ -49,19 +51,22 @@ def usage_msg():
     '''
 
 
-def send_mail(username, passwd, ta_list, dst_mail):
+def send_mail(username, passwd, ta_list, dst_mail, dryrun):
     ta_mail_list = [_[0] for _ in ta_list]
     message = mailer.Message(From=ta_mail_list[0],
                              To=dst_mail,
                              CC=ta_mail_list)
     subject = 'New password for ' + username
-    body = ('We have setup a new SSH account for {0} on OSLab Homework server\n'
-           'Server address: hw.oslab.cse.nsysu.edu.tw.\n'
-           'Your account: {0}\n'
-           'Your new password: {1}\n').format(username, passwd)
+    body = ('We have setup a new account for {0} on OSLab Homework server\n'
+            'Server address: hw.oslab.cse.nsysu.edu.tw.\n'
+            'Your account: {0}\n'
+            'Your new password: {1}\n').format(username, passwd)
     message.Subject = subject
     message.Body = body
-    mailer.Mailer().send(message)
+    if not dryrun:
+        mailer.Mailer().send(message)
+        # sleep for a few seconds after send mail
+        time.sleep(3)
     return
 
 
@@ -112,7 +117,7 @@ def create_user(user_file, ta_list, course_name, start_uid, dryrun):
             else:
                 os.system('{0} && {1} && {2}'.format(
                     create_cmd, docker_cmd, passwd_cmd))
-            send_mail(stu_id, passwd, ta_list, email)
+            send_mail(stu_id, passwd, ta_list, email, dryrun)
 
     return user_list
 
@@ -146,7 +151,9 @@ def main():
                         help='dry run, output running command and do nothing')
 
     args = parser.parse_args()
-    print (args)
+    if os.geteuid() != 0 and not args.dryrun:
+        print ("Please use root to run this script")
+        return -1
 
     # open file
     course = args.course[0]
@@ -163,5 +170,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # TODO: permission check
     main()
