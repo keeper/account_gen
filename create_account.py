@@ -76,7 +76,7 @@ def create_user(user_file, course_name, start_uid, dryrun):
             user_home = '/home/{0}/{1}'.format(course_name, stu_id)
             bash_file = user_home + '/.bashrc'
             create_cmd = 'useradd -m -d {0} -u {1} -g {2} {3}'.format(
-                  user_home, uid, GID, stu_id)
+                user_home, uid, GID, stu_id)
             # inject docker command
             docker_cmd = '"docker run -t -i -v {0}:/home/user {1} /bin/bash"'.format(
                          user_home, IMAGE_NAME)
@@ -94,7 +94,7 @@ def create_user(user_file, course_name, start_uid, dryrun):
                 print (passwd_cmd)
             else:
                 os.system('{0} && {1} && {2}'.format(
-                    create_cmd, docker_cmd, passwd_cmd)
+                    create_cmd, docker_cmd, passwd_cmd))
 
     return user_list
 
@@ -138,6 +138,9 @@ def main():
             ta_id, email = line.strip().split()
             # TODO: mail to TA
 
+    # TODO: mail to students
+
 
 if __name__ == "__main__":
+    # TODO: permission check
     main()
