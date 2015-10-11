@@ -4,6 +4,7 @@ import pathlib
 import os
 import random
 import string
+import mailer
 
 MIN_ID = 10000
 MAX_ID = 30000
@@ -48,6 +49,22 @@ def usage_msg():
     '''
 
 
+def send_mail(username, passwd, ta_list, dst_mail):
+    ta_mail_list = [_[0] for _ in ta_list]
+    message = mailer.Message(From=ta_mail_list[0],
+                             To=dst_mail,
+                             CC=ta_mail_list)
+    subject = 'New password for ' + username
+    body = ('We have setup a new SSH account for {0} on OSLab Homework server\n'
+           'Server address: hw.oslab.cse.nsysu.edu.tw.\n'
+           'Your account: {0}\n'
+           'Your new password: {1}\n').format(username, passwd)
+    message.Subject = subject
+    message.Body = body
+    mailer.Mailer().send(message)
+    return
+
+
 def get_max_uid(min_id, max_id):
     uid_list = []
     with open('/etc/passwd') as f:
@@ -60,7 +77,7 @@ def get_max_uid(min_id, max_id):
     return max(uid_list)
 
 
-def create_user(user_file, course_name, start_uid, dryrun):
+def create_user(user_file, ta_list, course_name, start_uid, dryrun):
     uid = start_uid
     user_list = []
     with open(user_file) as f:
@@ -95,8 +112,18 @@ def create_user(user_file, course_name, start_uid, dryrun):
             else:
                 os.system('{0} && {1} && {2}'.format(
                     create_cmd, docker_cmd, passwd_cmd))
+            send_mail(stu_id, passwd, ta_list, email)
 
     return user_list
+
+
+def get_ta_list(ta_file):
+    ta_list = []
+    with open(ta_file) as f:
+        for line in f:
+            email, ta_id = line.strip().split()
+            ta_list.append((email, ta_id))
+    return ta_list
 
 
 def create_pass_file(pass_file, user_list):
@@ -129,16 +156,10 @@ def main():
     pass_file = course_dir + '/pass'
 
     uid = get_max_uid(MIN_ID, MAX_ID) + 1
-    user_list = create_user(user_file, course, uid, args.dryrun)
+    ta_list = get_ta_list(ta_file)
+    user_list = create_user(user_file, ta_list, course, uid, args.dryrun)
     if not args.dryrun:
         create_pass_file(pass_file, user_list)
-
-    with open(ta_file) as f:
-        for line in f:
-            ta_id, email = line.strip().split()
-            # TODO: mail to TA
-
-    # TODO: mail to students
 
 
 if __name__ == "__main__":
