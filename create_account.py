@@ -63,6 +63,7 @@ def send_mail(username, passwd, ta_list, dst_mail, dryrun):
             'Your new password: {1}\n').format(username, passwd)
     message.Subject = subject
     message.Body = body
+    print ('Sending mail to ' + username)
     if not dryrun:
         mailer.Mailer().send(message)
         # sleep for a few seconds after send mail
