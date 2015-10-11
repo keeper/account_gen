@@ -52,7 +52,7 @@ def usage_msg():
 
 
 def send_mail(username, passwd, ta_list, dst_mail, dryrun):
-    ta_mail_list = [_[0] for _ in ta_list]
+    ta_mail_list = ['"{1}" <{0}>'.format(_[0], _[1]) for _ in ta_list]
     message = mailer.Message(From=ta_mail_list[0],
                              To=dst_mail,
                              CC=ta_mail_list)
