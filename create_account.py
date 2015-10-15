@@ -57,7 +57,7 @@ def usage_msg():
     '''
 
 
-def send_mail(username, passwd, ta_list, dst_mail, dryrun):
+def send_mail(username, passwd, ta_list, dst_mail):
     ta_mail_list = ['"{1}" <{0}>'.format(_[0], _[1]) for _ in ta_list]
     message = mailer.Message(From=ta_mail_list[0],
                              To=dst_mail,
@@ -70,11 +70,9 @@ def send_mail(username, passwd, ta_list, dst_mail, dryrun):
     message.Subject = subject
     message.Body = body
     print ('Sending mail to ' + username)
-    if not dryrun:
-        mailer.Mailer(MAIL_SERVER).send(message)
-        # sleep for a few seconds after send mail
-        time.sleep(3)
-    return
+    mailer.Mailer(MAIL_SERVER).send(message)
+    # sleep for a few seconds after send mail
+    time.sleep(3)
 
 
 def get_max_uid(min_id, max_id):
@@ -128,7 +126,7 @@ def create_user(user_file, ta_list, course_name, start_uid, dryrun):
                 for i in range(1, 10):
                     path = user_home + '/hw' + str(i)
                     os.chmod(user_home, stat.S_IRWXU | stat.S_IRWXG)
-            send_mail(stu_id, passwd, ta_list, email, dryrun)
+                send_mail(stu_id, passwd, ta_list, email)
 
     return user_list
 
