@@ -7,6 +7,7 @@ import string
 import mailer
 import sys
 import time
+import stat
 
 # TODO:
 # This parameter can go to a config file
@@ -103,11 +104,12 @@ def create_user(user_file, ta_list, course_name, start_uid, dryrun):
             # create account
             user_home = '/home/{0}/{1}'.format(course_name, stu_id)
             bash_file = user_home + '/.bashrc'
-            create_cmd = 'useradd -m -d {0} -u {1} -g {2} {3}'.format(
-                user_home, uid, GID, stu_id)
+            skel_file = os.getcwd() + '/docker_skel'
+            create_cmd = 'useradd -m -d {0} -u {1} -g {2} -k {3} {4}'.format(
+                user_home, uid, GID, skel_file, stu_id)
             # inject docker command
-            docker_cmd = '"docker run -t -i -v {0}:/home/user {1} /bin/bash"'.format(
-                         user_home, IMAGE_NAME)
+            docker_cmd = '''"docker run -t -i -v {0}:/home/user {1} /bin/bash"'''.format(
+                user_home, IMAGE_NAME)
             docker_cmd = 'echo {0} >> {1}'.format(docker_cmd, bash_file)
             uid = uid + 1
             # create password
@@ -123,6 +125,9 @@ def create_user(user_file, ta_list, course_name, start_uid, dryrun):
             else:
                 os.system('{0} && {1} && {2}'.format(
                     create_cmd, docker_cmd, passwd_cmd))
+                for i in range(1, 10):
+                    path = user_home + '/hw' + str(i)
+                    os.chmod(user_home, stat.S_IRWXU | stat.S_IRWXG)
             send_mail(stu_id, passwd, ta_list, email, dryrun)
 
     return user_list
