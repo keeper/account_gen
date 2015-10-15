@@ -8,11 +8,16 @@ import mailer
 import sys
 import time
 
+# TODO:
+# This parameter can go to a config file
+# in the future.
+
 MIN_ID = 10000
 MAX_ID = 30000
 GID = 10000
-IMAGE_NAME = 'ubuntu-gccv2:14.04'
 PASS_SIZE = 6
+IMAGE_NAME = 'ubuntu-15.04-user'
+MAIL_SERVER = 'oslab.cse.nsysu.edu.tw'
 
 
 def usage_msg():
@@ -65,7 +70,7 @@ def send_mail(username, passwd, ta_list, dst_mail, dryrun):
     message.Body = body
     print ('Sending mail to ' + username)
     if not dryrun:
-        mailer.Mailer().send(message)
+        mailer.Mailer(MAIL_SERVER).send(message)
         # sleep for a few seconds after send mail
         time.sleep(3)
     return
