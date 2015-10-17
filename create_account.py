@@ -8,6 +8,7 @@ import mailer
 import sys
 import time
 import stat
+import errno
 
 # TODO:
 # This parameter can go to a config file
@@ -87,6 +88,16 @@ def get_max_uid(min_id, max_id):
     return max(uid_list)
 
 
+def create_course_dir(course_name):
+    path = '/home/' + course_name
+    try:
+        os.makedirs(path)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else: raise
+
+
 def create_user(user_file, ta_list, course_name, start_uid, dryrun):
     uid = start_uid
     user_list = []
@@ -121,6 +132,7 @@ def create_user(user_file, ta_list, course_name, start_uid, dryrun):
                 print (docker_cmd)
                 print (passwd_cmd)
             else:
+                create_course_dir(course_name)
                 os.system('{0} && {1} && {2}'.format(
                     create_cmd, docker_cmd, passwd_cmd))
                 for i in range(1, 10):
