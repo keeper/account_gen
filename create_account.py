@@ -116,6 +116,9 @@ def create_user(user_file, ta_list, course_name, start_uid, dryrun):
             skel_file = os.getcwd() + '/docker_skel'
             create_cmd = 'useradd -m -d {0} -u {1} -g {2} -k {3} {4}'.format(
                 user_home, uid, GID, skel_file, stu_id)
+            ##tzu##
+            join_docker_cmd = 'sudo usermod -aG docker {0}'.format(stu_id)
+            ##tzu##    
             # inject docker command
             docker_cmd = '''"docker run -t -i -v {0}:/home/user {1} /bin/bash"'''.format(
                 user_home, IMAGE_NAME)
@@ -133,8 +136,9 @@ def create_user(user_file, ta_list, course_name, start_uid, dryrun):
                 print (passwd_cmd)
             else:
                 create_course_dir(course_name)
-                os.system('{0} && {1} && {2}'.format(
-                    create_cmd, docker_cmd, passwd_cmd))
+                ##tzu##
+                os.system('{0} && {1} && {2} && {3}'.format(
+                    create_cmd, docker_cmd, passwd_cmd, join_docker_cmd))
                 for i in range(1, 10):
                     path = user_home + '/hw' + str(i)
                     os.chmod(user_home, stat.S_IRWXU | stat.S_IRWXG)
