@@ -120,7 +120,7 @@ def create_user(user_file, ta_list, course_name, start_uid, dryrun):
             join_docker_cmd = 'sudo usermod -aG docker {0}'.format(stu_id)
             ##tzu##    
             # inject docker command
-            docker_cmd = '''"docker run -t -i -v {0}:/home/user {1} /bin/bash"'''.format(
+            docker_cmd = '''"docker run -t -i -v {0}:/home/user {1} /bin/bash; exit"'''.format(
                 user_home, IMAGE_NAME)
             docker_cmd = 'echo {0} >> {1}'.format(docker_cmd, bash_file)
             uid = uid + 1
