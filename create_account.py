@@ -112,7 +112,7 @@ def create_user(user_file, ta_list, course_name, start_uid, dryrun):
                 email = stu_id + email
             # create account
             user_home = '/home/{0}/{1}'.format(course_name, stu_id)
-            bash_file = user_home + '/.bashrc'
+            bash_file = user_home + '/.profile'
             skel_file = os.getcwd() + '/docker_skel'
             create_cmd = 'useradd -m -d {0} -u {1} -g {2} -k {3} {4}'.format(
                 user_home, uid, GID, skel_file, stu_id)
