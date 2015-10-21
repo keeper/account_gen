@@ -141,7 +141,9 @@ def create_user(user_file, ta_list, course_name, start_uid, dryrun):
                     create_cmd, docker_cmd, passwd_cmd, join_docker_cmd))
                 for i in range(1, 10):
                     path = user_home + '/hw' + str(i)
-                    os.chmod(user_home, stat.S_IRWXU | stat.S_IRWXG)
+                    os.makedirs(path, stats.S_IRWXU | stat.S_IRWXG)
+                    # os.chmod(user_home, stat.S_IRWXU | stat.S_IRWXG)
+                    os.chown(path, username, gid)
                 send_mail(stu_id, passwd, ta_list, email)
 
     return user_list
