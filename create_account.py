@@ -143,7 +143,7 @@ def create_user(user_file, ta_list, course_name, start_uid, dryrun):
                     path = user_home + '/hw' + str(i)
                     os.makedirs(path, stat.S_IRWXU | stat.S_IRWXG)
                     # os.chmod(user_home, stat.S_IRWXU | stat.S_IRWXG)
-                    os.chown(path, username, gid)
+                    os.chown(path, stu_id, gid)
                 send_mail(stu_id, passwd, ta_list, email)
 
     return user_list
