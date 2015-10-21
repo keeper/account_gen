@@ -123,7 +123,6 @@ def create_user(user_file, ta_list, course_name, start_uid, dryrun):
             docker_cmd = '''"docker run -t -i -v {0}:/home/user {1} /bin/bash; exit"'''.format(
                 user_home, IMAGE_NAME)
             docker_cmd = 'echo {0} >> {1}'.format(docker_cmd, bash_file)
-            uid = uid + 1
             # create password
             passwd = ''.join(random.choice(
                 string.ascii_uppercase + string.ascii_lowercase + string.digits)
@@ -145,6 +144,7 @@ def create_user(user_file, ta_list, course_name, start_uid, dryrun):
                     # os.chmod(user_home, stat.S_IRWXU | stat.S_IRWXG)
                     os.chown(path, uid, GID)
                 send_mail(stu_id, passwd, ta_list, email)
+            uid = uid + 1
 
     return user_list
 
